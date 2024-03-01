@@ -1,5 +1,5 @@
 <template>
-    <div class="flex justify-between p-2xl border-b border-r-sidebar-border-primary items-center">
+    <div class="flex justify-between p-2xl border-b border-r-sidebar-border-primary items-center bg-background-primary ">
         <h1 class="text-content-primary leading-[32px] font-semibold text-2xl" >Users dashboard</h1>
 
 

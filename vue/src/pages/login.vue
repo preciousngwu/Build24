@@ -34,19 +34,22 @@
                             <router-link to="/reset/password">Forgot password?</router-link>
                         </span>
                     </label>
-                    <Input @get="payload.form.password = $event" :type="payload.see ? 'text' : 'password'">
-                    <template v-slot:start>
-                        <locked></locked>
-                    </template>
 
-                    <template v-slot:end>
-                        <eye-open v-if="!payload.see" @click="payload.see = true"></eye-open>
-                        <eye-close v-if="payload.see" @click="payload.see = false"></eye-close>
-                    </template>
-                    </Input>
+                    <div class="relative h-fit ">
+                        <div class="h-full w-fit absolute top-0 grid place-items-center left-lg">
+                            <locked></locked>
+                        </div>
+                        <div class="h-full w-fit absolute top-0 grid place-items-center right-lg">
+                            <eyeOpen v-if="!payload.see" @click="payload.see = true"></eyeOpen>
+                            <eyeClose v-if="payload.see" @click="payload.see = false"></eyeClose>
+                        </div>
+                        <input v-model="payload.form.password"
+                            class="lg:min-w-[378px] w-full  text-start py-md pr-lg pl-[40px] border  border-border-primary  rounded-lg height "
+                            :type="(payload.see ? 'text' : 'password')">
+                    </div>
                 </div>
 
-                <Button :load="payload.load">
+                <Button :type="'submit'" :load="payload.load">
                     <template v-slot:icon>
                         <arrowRight></arrowRight>
                     </template>
@@ -62,7 +65,7 @@
 
 <script setup>
 
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import axios from 'axios'
 import router from "@/router/index.js"
 import { is_admin } from "@/helper.js"
@@ -82,7 +85,7 @@ import errorEvent from "@/components/modules/error-event.vue"
 
 const payload = ref({
     form: {
-        is_admin: is_admin()
+        account: is_admin()
     },
     see: false,
     error: "",
@@ -94,16 +97,16 @@ function login() {
     if (payload.value.load) {
         return
     }
+
     payload.value.load = true;
     axios.post('login', payload.value.form).then((e) => {
         payload.value.load = false;
-        router.push({ name: 'dash.home' })
+        router.push("/")
     }).catch((e) => {
+        console.log(e)
         payload.value.load = false;
         payload.value.error = e.response.data.message
     })
-
-
 }
 </script>
 

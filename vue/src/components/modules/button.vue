@@ -1,18 +1,12 @@
 <template>
-    <button
-        :class="(width ?? 'lg:min-w-[376px] w-full') + ' h-fit bg-background-accent-B flex justify-center items-center rounded-lg gap-md text-start py-md px-xl ' + (classnames)">
+    <button :type="type ?? 'button'"
+        :class="(width ?? 'lg:min-w-[376px] w-full') + ' h-fit bg-background-accent-B flex justify-center items-center rounded-lg gap-md text-start py-md px-xl ' + (classnames ?? '')">
         <spinner v-if="load"></spinner>
         <slot v-else name="icon"></slot>
-        <span class="text-content-inverse-primary ">
+        <span :class="'text-' + (text ?? 'content-inverse-primary') + ' text-' + (font ?? 'sm')">
             <slot name="text"> </slot>
         </span>
     </button>
-
-
-
-    <div>
-
-    </div>
 </template>
 
 <script setup>
@@ -21,6 +15,9 @@ import spinner from "@/components/icons/spinner.vue"
 defineProps({
     load: Boolean,
     width: String,
-    classnames: String
+    classnames: String,
+    text: String,
+    font: String,
+    type: String
 })
 </script>

@@ -1,35 +1,46 @@
 <template>
-    <div class="w-fit  overflow-y-auto h-full bg-sidebar-background-dark border-r border-r-sidebar-border-primary">
-        <div class="w-[52px] h-full flex flex-col justify-between ">
+    <div
+        class="w-fit overflow-x-hidden  overflow-y-auto h-full bg-sidebar-background-dark border-r border-r-sidebar-border-primary">
+        <div class=" h-full flex flex-col justify-between ">
             <div class="w-full h-fit">
-                <div
-                    class=" hover:cursor-pointer  grid place-content-center h-[52px] border-b border-sidebar-border-primary">
+                <div class=" hover:cursor-pointer  grid place-content-center p-xl border-b border-sidebar-border-primary">
                     <hambuger></hambuger>
                 </div>
-                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center h-[52px]">
-                    <dashboard></dashboard>
-                </div>
-                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center h-[52px]">
-                    <sidebarUser></sidebarUser>
-                </div>
+                <router-link :to="{ name: 'dash.home' }">
+                    <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center p-xl">
+                        <dashboard></dashboard>
+                    </div>
+                </router-link>
 
-                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center h-[52px]">
-                    <sidebarCap></sidebarCap>
+                <!-- <router-link :to="{ name: 'dash.course' }"> -->
+                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center p-xl">
+                    <sidebarUser>
+                    </sidebarUser>
                 </div>
+                <!-- </router-link> -->
 
-                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center h-[52px]">
+                <router-link :to="{ name: 'dash.course' }">
+                    <div
+                        :class="(router.currentRoute.value.name.includes('course') ? 'bg-sidebar-background-accent-A' : '') + ' hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center p-xl'">
+                        <sidebarCap :fill="(router.currentRoute.value.name.includes('course') ? '#FFFFFF' : undefined)">
+                        </sidebarCap>
+                    </div>
+                </router-link>
+
+                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center p-xl">
                     <sidebarUsers></sidebarUsers>
                 </div>
             </div>
             <div class="w-full h-fit">
-                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center h-[52px]">
+                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center p-xl">
                     <sidebar-hint></sidebar-hint>
                 </div>
-                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center h-[52px]">
+                <div class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center p-xl">
                     <sidebar-setting></sidebar-setting>
                 </div>
 
-                <form @click="logout()" class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center h-[52px]">
+                <form @click="logout()"
+                    class="hover:bg-sidebar-background-accent-A hover:cursor-pointer grid place-content-center p-xl">
                     <Logout></Logout>
                 </form>
             </div>
@@ -41,6 +52,9 @@
 
 import axios from 'axios';
 import router from '@/router/index.js'
+import { useUserStore } from "@/stores/users"
+
+
 // Icons
 import hambuger from "@/components/icons/hambuger.vue"
 import dashboard from "@/components/icons/dashboard.vue"
@@ -52,9 +66,14 @@ import sidebarSetting from "@/components/icons/sidebar-setting.vue"
 import Logout from "@/components/icons/logout.vue"
 
 
+const userStore = useUserStore();
+
 
 function logout() {
     axios.post('logout').then(() => {
+        userStore.clearUser()
+
+        router.currentRoute
         router.push({ name: 'login' })
     })
 }

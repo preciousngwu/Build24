@@ -16,12 +16,20 @@ axios.defaults.baseURL = import.meta.env.VITE_API_BASEURL;
 
 window.$ = jquery
 
-const app = createApp(App)
 
-app.use(createPinia())
-app.use(router)
 
-app.mount('#app')
+
+// Add a response interceptor
+axios.interceptors.response.use(
+    async function (res) { return res },
+    function (res) {
+        if (res.response != undefined && res.response.status == 401) {
+            router.push({ name: 'login' })
+        }
+        throw res;
+    }
+);
+
 
 
 // Add a request interceptor
@@ -43,13 +51,13 @@ axios.interceptors.request.use(async function (config) {
 });
 
 
+const app = createApp(App)
 
-// Add a response interceptor
-axios.interceptors.response.use(
-    response => response,
-    error => {
-        if (error.response != undefined && error.response.status == 401) {
-            router.push({ name: 'login' })
-        }
-        throw error;
-    });
+app.use(createPinia())
+app.use(router)
+
+app.mount('#app')
+
+
+
+

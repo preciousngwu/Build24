@@ -6,9 +6,9 @@
         <div class="h-full w-fit absolute top-0 grid place-items-center right-lg">
             <slot name="end"></slot>
         </div>
-        <input :autocomplete="'new-password'" @input="$emit('get', $event.target.value)"
-            :class="(width ?? 'lg:min-w-[378px] w-full ') + ' py-md pr-lg pl-[40px] border border-border-primary  rounded-lg h-fit'"
-            :type="type" :placeholder="placeholder" :id="id">
+        <input  @input="$emit('get', $event.target.value)"
+            :class="(width ?? 'lg:min-w-[378px] w-full ') + (classnames ?? '') + ' text-start py-md pr-lg pl-[40px] border ' + (border ?? 'border-border-primary ') + '  rounded-lg ' + (height ?? 'h-fit ')"
+            :type="type" :placeholder="placeholder" :id="id" :value="value">
     </div>
 </template>
 
@@ -21,7 +21,11 @@ const props = defineProps({
     id: String,
     type: String,
     placeholder: String,
-    width: String
+    width: String,
+    height: String,
+    border: String,
+    classnames: String,
+    value: String
 })
 
 </script>

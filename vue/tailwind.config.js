@@ -20,7 +20,18 @@ const colors = {
   "border-primary": "#D1D5DB",
   "background-accent-A": "#2563EB",
   "background-secondary": "#F9FAFB",
-  "background-tertiary": "#F3F4F6"
+  "background-tertiary": "#F3F4F6",
+  "background-overlay": "rgba(17, 24, 39, 0.5)",
+  "border-accent-A": "#3B82F6",
+  "background-accent-A-light": "#EFF6FF",
+  "background-danger": "#EF4444",
+  "border-success": "#10B981",
+  "background-success-light": "#ECFDF5",
+  "content-success": "#10B981",
+  "background-dark": "#1F2937",
+  "border-dark": "#374151",
+  "background-warning-light": "#FFF7ED",
+  "background-danger": "#EF4444"
 }
 
 
@@ -31,13 +42,15 @@ const spacing = {
   "md": "8px",
   "lg": "12px",
   "xl": "16px",
-  "2xl": "24px",
-  "3xl": "32px",
-  "4xl": "48px",
-  "5xl": "64px",
-  "6xl": "96px",
-}
+  "2xl": "20px",
+  "3xl": "24px",
+  "4xl": "32px",
+  "5xl": "48px",
+  "6xl": "64px",
+  "7xl": "96px",
+  "15xl": "240px"
 
+}
 const borderRadius = {
   "sm": "2px",
   "md": "4px",
@@ -46,7 +59,6 @@ const borderRadius = {
   "2xl": "24px",
   "circular": "9999px",
 }
-
 const fontSize = {
   "xs": "12px",
   "sm": "14px",
@@ -57,7 +69,6 @@ const fontSize = {
   "3xl": "30px",
   "4xl": "36px"
 }
-
 const fontWeight =
 {
   "regular": 400,
@@ -66,7 +77,18 @@ const fontWeight =
   "bold": 700,
   "extrabold": 800
 }
+const lineHeight =
+{
+  "xs": '16px',
+  "sm": '20px',
+  "md": '24px',
+  "lg": '28px',
+  "xl": '32px',
+  '2xl': '36px',
+  '3xl': '40px'
+}
 
+const borderWidth = spacing
 const gap = spacing;
 
 // tailwind.config.js
@@ -79,7 +101,10 @@ module.exports = {
       spacing,
       borderRadius,
       fontSize,
-      gap
+      gap,
+      fontWeight,
+      lineHeight,
+      borderWidth
     },
   },
   variants: {
