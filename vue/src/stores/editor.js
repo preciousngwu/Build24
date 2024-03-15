@@ -181,7 +181,7 @@ export const useEditorStore = defineStore('editor', () => {
     // }, { deep: true });
 
     function autoSave() {
-        // setInterval(() => { saveDrafts() }, 20000)
+        setInterval(() => { saveDrafts() }, 20000)
     }
 
     return {
