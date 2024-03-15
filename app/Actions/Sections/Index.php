@@ -18,7 +18,7 @@ class Index implements ApiRouteInterface
     public function do()
     {
         try {
-            return response()->success(Auth::user()->sections()->where('sections.course_id', $this->req->course_id)->with(['lessons', 'levels'])->orderBy('sections.id', 'DESC')->get());
+            return response()->success(Auth::user()->sections()->where('sections.course_id', $this->req->course_id)->with(['lessons.resources', 'levels'])->orderBy('sections.id', 'DESC')->get());
         } catch (\Exception $e) {
             return response()->failed($e->getMessage());
         }

@@ -40,19 +40,27 @@
                 <div @click="editor.setTab('course-tab', 'content')" class="p-xl  cursor-pointer">User questions</div>
             </div>
         </div>
-        <div class="overflow-y-hidden h-full">
+        <div class="overflow-hidden h-full">
             <div class="flex h-full">
                 <div
-                    class="h-full overflow-y-auto overflow-x-hidden w-[20%] p-xl border-r border-border-primary grid gap-3xl ">
-                    <sectionList v-if="editor.getTab('course-tab') == 'content'" @section="getSection($event)">
-                    </sectionList>
-                    <editor-course-settings-sidebar @tab="editor.setTab('course-settings', $event)"
-                        v-if="editor.getTab('course-tab') == 'settings'"></editor-course-settings-sidebar>
+                    class="overflow-y-clip side-weeler min-h-full   w-[20%] p-xl border-r border-border-primary  gap-3xl ">
+                    <div class="">
+                        <sectionList v-if="editor.getTab('course-tab') == 'content'" @selected="getSelected($event)">
+                        </sectionList>
+                        <editor-course-settings-sidebar @tab="editor.setTab('course-settings', $event)"
+                            v-if="editor.getTab('course-tab') == 'settings'"></editor-course-settings-sidebar>
+                    </div>
                 </div>
-                <div class="w-[80%] pl-3xl grid gap-lg full overflow-y-auto ">
-                    <sectionManage :courseLevels="configs.course.levels" v-if="editor.getTab('course-tab') == 'content'"
-                        :section="configs.section">
-                    </sectionManage>
+                <div class="w-[80%]  grid gap-lg  overflow-y-auto overflow-x-hidden">
+                    <div class="w-full" v-if="editor.getTab('course-tab') == 'content'">
+                        <editor-lessons v-if="configs.content.type == 'lesson'"
+                            :selected="configs.content.selected"></editor-lessons>
+                        <div v-if="configs.content.type == 'section' && configs.content.selected.section != undefined">
+                            <sectionManage :courseLevels="configs.course.levels"
+                                :section="configs.content.selected.section">
+                            </sectionManage>
+                        </div>
+                    </div>
                     <editorCourseSettings @currentLevels="configs.course.levels = $event"
                         v-if="editor.getTab('course-tab') == 'settings'" :course="configs.course">
                     </editorCourseSettings>
@@ -68,7 +76,7 @@ import axios from 'axios';
 import router from '@/router';
 
 
-import { onBeforeMount, onMounted, ref } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useEditorStore } from '@/stores/editor';
 
 
@@ -78,6 +86,7 @@ import Button from '@/components/modules/button.vue';
 // Editor chunks
 import sectionList from "@/components/chunks/editor-section-list.vue"
 import sectionManage from "@/components/chunks/editor-section-manage.vue"
+import editorLessons from "@/components/chunks/editor-lessons.vue"
 import editorCourseSettings from "@/components/chunks/editor-course-settings.vue"
 import editorCourseSettingsSidebar from "@/components/chunks/editor-course-settings-sidebar.vue"
 
@@ -86,16 +95,24 @@ import editorCourseSettingsSidebar from "@/components/chunks/editor-course-setti
 const editor = useEditorStore();
 const configs = ref({
     id: router.currentRoute.value.params.course,
-    section: 0,
+    content: {
+        selected: {},
+        type: 'section'
+    },
     course: {},
     courseSetting: {}
 })
 
-function getSection($event) {
-    configs.value.section = $event
+function getSelected(e) {
+    configs.value.content = e
 }
 
 onBeforeMount(() => {
+    router.beforeEach(() => {
+        editor.resetDraft()
+        editor.configs.init = false
+    })
+
     editor.setTab('course-tab', 'content')
 })
 
@@ -104,7 +121,8 @@ onMounted(() => {
     if (configs.value.id) {
         axios.get('/admin/course/show?id=' + configs.value.id).then((e) => {
             configs.value.course = e.data.data
-            editor.saveToDraft('course', _.pick(e.data.data, ['id', 'title', 'summary', 'signup_link']), true)
+
+            editor.saveToDraft('course', _.pick(e.data.data, ['id', 'title', 'summary', 'signup_link', 'levels']), true)
             editor.autoSave()
             document.onkeydown = function (e) {
                 if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
@@ -114,8 +132,6 @@ onMounted(() => {
             };
         });
     }
-
-
-
 })
+
 </script>

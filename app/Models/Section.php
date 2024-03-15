@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Models\Level;
+use App\Traits\SimilarMutateTraits;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Section extends Model
 {
-    use HasFactory;
+    use HasFactory, SimilarMutateTraits;
     protected $fillable = ["course_id", "title", "summary", "extras"];
+    protected $hidden = ['pivot'];
 
     public function lessons()
     {
@@ -20,19 +22,17 @@ class Section extends Model
     /**
      * Get all of the levels attached to sections.
      */
-    public function levels(): BelongsToMany
+    // public function levels(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Level::class, "tagged_levels", 'tagged_id')->where("tagged_type", Section::class)->using(Tagged_level::class);
+    // }
+
+    /**
+     * Get all of the tags for the post.
+     */
+    public function levels(): MorphToMany
     {
-        return $this->belongsToMany(Level::class, "tagged_levels", 'tagged_id')->using(Tagged_level::class);
+        return $this->morphToMany(Level::class, 'tagged', 'tagged_levels');
     }
 
-    public function extras(): Attribute
-    {
-        return Attribute::make(set: function ($v) {
-            return json_encode(!is_array($v) ? (array) $v : $v);
-        },
-            get: function ($v) {
-                $v = json_decode($v);
-                return !is_array($v) ? (array) $v : $v;
-            });
-    }
 }

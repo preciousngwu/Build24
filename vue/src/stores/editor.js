@@ -1,10 +1,11 @@
 import { ref, computed, watchEffect, watch, toRaw, unref } from 'vue'
 import { defineStore } from 'pinia'
 
-import _, { forIn, remove } from 'lodash'
+import _, { assign, forIn, isArray, isObject, remove, update } from 'lodash'
 import axios from 'axios'
 import router from '@/router'
 import { useInteractStore } from "@/stores/interact"
+import { stringify } from 'postcss'
 
 export const useEditorStore = defineStore('editor', () => {
 
@@ -17,16 +18,46 @@ export const useEditorStore = defineStore('editor', () => {
         sections: [],
         course: {}
     })
+
     const configs = ref({
+        init: false,
         alert: false,
         currentCourse: undefined,
         tab: {}
     })
 
+
+    function resetDraft() {
+        const empty = {
+            sections: [],
+            course: {}
+        }
+        drafts.value = empty
+        old.value = empty
+    }
+
+
+    function pushLevel(id, draft) {
+        id = parseInt(id)
+        getCurrentCourse.value.levels.map((v) => {
+            if (v.id == id) {
+                if (!_.includes(draft.levels.map((e) => e.id), id)) {
+                    draft.levels.push(v)
+                };
+            }
+        })
+    }
+
+    function removeLevel(id, draft) {
+        id = parseInt(id)
+        draft.levels = _.remove(draft.levels, (n) => { return n.id != id })
+    }
+
+
+    /** Course get/set */
     function setCurrentCourse(v, first = false) {
         saveToDraft('course', v, first)
     }
-
     const getCurrentCourse = computed(() => {
         return drafts.value.course;
     })
@@ -53,10 +84,9 @@ export const useEditorStore = defineStore('editor', () => {
             setOld(key, value)
         }
     }
-    function addToDraft(key, value) {
+    function addToDraft(key, value, sub = undefined) {
         drafts.value[key].unshift(value)
     }
-
     function setOld(key, value) {
         old.value[key] = removeRef(value);
     }
@@ -65,15 +95,45 @@ export const useEditorStore = defineStore('editor', () => {
 
         /** Section check */
         if (!_.isEqual(drafts.value.sections, old.value.sections)) {
-            let toUpdate = [];
-            const current = removeRef(drafts.value.sections);
-            current.map((v) => {
-                if (!_.find(old.value.sections, v)) {
-                    toUpdate.push(_.pick(v, ['title', 'id', 'summary', 'extras', 'section_levels']))
+            const form = new FormData();
+            let current = (drafts.value.sections);
+            form.append('course_id', router.currentRoute.value.params.course)
+            current.map((v, i) => {
+                for (const key in v) {
+                    if (!_.includes(['lessons',], key)) {
+                        form.append(`updates[${i}][${key}]`, typeof v[key] === 'string' ? v[key] : JSON.stringify(v[key]));
+                    }
+                    if (_.includes(['lessons'], key) && _.isArray(v[key])) {
+                        for (const lkey in v[key]) {
+                            for (const each in v[key][lkey]) {
+                                // if (_.includes(['created_at', 'updated_at', 'levels', 'resources'], each)) {
+                                //     continue;
+                                // }
+                                if (_.includes(['lesson_video', 'lesson_pdf', 'lesson_sheet'], each)) {
+                                    form.append(`updates[${i}][${key}][${lkey}][${each}]`, v[key][lkey][each]);
+                                } else {
+                                    form.append(`updates[${i}][${key}][${lkey}][${each}]`, typeof v[key][lkey][each] === 'string' ? v[key][lkey][each] : JSON.stringify(v[key][lkey][each]));
+                                }
+                            }
+                        }
+                    }
                 }
             });
-            axios.post('/admin/sections/bulk_update', { course_id: router.currentRoute.value.params.course, updates: toUpdate }).then((e) => {
-                saveToDraft('sections', current, true);
+
+            // console.log(current.map(v => _.omit(v, ['resources'])));
+            // current.map((v) => {
+            //     toUpdate.push(_.pick(v, ['title', 'id', 'summary', 'extras', 'level_ids', 'lessons']))
+            // // });
+
+            axios.post('/admin/sections/bulk_update', form, { headers: { "enctype": 'multipart/form-data' } }).then((e) => {
+                // current = e.data.data.updates;
+                // updates.map((c, i) => {
+                //     // for (let index = 0; index < updates.length; index++) {
+                //     console.log(c)
+                //     current[i] = _.assign(current[i], updates[index])
+                //     // }
+                // })
+                saveToDraft('sections', e.data.data.updates, true);
                 alert()
             })
         }
@@ -121,8 +181,23 @@ export const useEditorStore = defineStore('editor', () => {
     // }, { deep: true });
 
     function autoSave() {
-        setInterval(() => { saveDrafts() }, 20000)
+        // setInterval(() => { saveDrafts() }, 20000)
     }
 
-    return { removeRef, saveToDraft, addToDraft, drafts, configs, autoSave, saveDrafts, setCurrentCourse, getCurrentCourse, setTab, getTab }
+    return {
+        removeLevel,
+        pushLevel,
+        removeRef,
+        saveToDraft,
+        addToDraft,
+        drafts,
+        configs,
+        autoSave,
+        saveDrafts,
+        setCurrentCourse,
+        getCurrentCourse,
+        setTab,
+        getTab,
+        resetDraft
+    }
 })

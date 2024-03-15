@@ -14,19 +14,20 @@
                 <smallTextVue :text="'sm'" :font="'medium'">User level benefits</smallTextVue>
                 <div v-for="(v, i) in form.benefits" :key="i" class="w-full relative gap-md">
                     <span class="pl-lg absolute left-0 w-fit grid place-content-center h-full font-semibold">{{ i + 1
-                    }}</span>
+                        }}</span>
                     <input v-model="form.benefits[i]"
                         class="border border-border-primary rounded-lg  text-start px-3xl py-md  w-full text-content-secondary">
                 </div>
-                <!-- 8px, 12px, 8px, 12px -->
             </div>
 
-            <span @click="form.benefits.push('')" class=" cursor-pointer underline text-content-tertiary">+ Add more</span>
+            <span @click="form.benefits.push('')" class=" cursor-pointer underline text-content-tertiary">+ Add
+                more</span>
 
             <div class="flex justify-end gap-lg">
                 <div class="w-fit" @click="$emit('close')">
                     <Button :type="'button'" :width="'w-fit'"
-                        :classnames="'!bg-transparent border border-border-primary text-nowrap'" :text="'content-tertiary'">
+                        :classnames="'!bg-transparent border border-border-primary text-nowrap'"
+                        :text="'content-tertiary'">
                         <template v-slot:text>
                             cancel
                         </template>
@@ -55,7 +56,7 @@ import { useEditorStore } from '@/stores/editor';
 import smallTextVue from '../modules/smallText.vue';
 import Button from '@/components/modules/button.vue';
 
-const emits = defineEmits(['close', 'added'])
+const emits = defineEmits(['close'])
 const editor = useEditorStore();
 
 const form = ref({
@@ -65,7 +66,8 @@ const form = ref({
 function create() {
     const payload = Object.assign(form.value, { course_id: editor.getCurrentCourse.id })
     axios.post('/admin/levels/store', payload).then((e) => {
-        emits('added', e.data.data)
+        editor.drafts.course.levels.push(e.data.data)
+        emits('close')
     }).catch((e) => {
         console.log(e)
     })

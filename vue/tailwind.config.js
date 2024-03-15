@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 
 const colors = {
+  "background-tertiary-state-hover": "#E5E7EB",
   "border-secondary": "#E5E7EB",
   "background-primary": "#FFFFFF",
   "content-primary": "#111827",
@@ -31,7 +32,7 @@ const colors = {
   "background-dark": "#1F2937",
   "border-dark": "#374151",
   "background-warning-light": "#FFF7ED",
-  "background-danger": "#EF4444"
+  "background-danger": "#EF4444",
 }
 
 

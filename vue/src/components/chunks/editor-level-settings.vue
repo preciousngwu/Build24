@@ -1,5 +1,5 @@
 <template>
-    <div class="h-fit grid gap-3xl py-3xl lg:w-[727px]">
+    <div class="h-fit grid gap-3xl p-3xl lg:w-[727px]">
         <div class="flex items-center justify-between">
             <div class="grid gap-sm pb-3xl">
                 <h1 class="font-semibold">User levels</h1>
@@ -16,7 +16,7 @@
                 </Button>
             </div>
         </div>
-        <div v-for="(v, i) in config.levels" :key="i" class="border border-border-primary rounded-lg">
+        <div v-for="(v, i) in editor.drafts.course.levels" :key="i" class="border border-border-primary rounded-lg">
             <div class="rounded-t-lg bg-background-secondary flex justify-between py-md px-lg">
                 <h1 class="font-medium">{{ v.title }}</h1>
                 <Trash @click="remove(v)"></Trash>
@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <editorCreateLevel @added="push($event)" @close="config.create = false" v-if="config.create"></editorCreateLevel>
+    <editorCreateLevel @close="config.create = false" v-if="config.create"></editorCreateLevel>
 </template>
 
 <script setup>
@@ -53,16 +53,12 @@ const config = ref({
     levels: []
 });
 
-function push(e) {
-    config.value.levels.push(e)
-    config.value.create = false
-    emits('currentLevels', editor.removeRef(config.value.levels))
-}
 
 function remove(v) {
     axios.post('/admin/levels/delete', { level_id: v.id }).then((e) => {
-        _.remove(config.value.levels, v)
-        emits('currentLevels', editor.removeRef(config.value.levels))
+        editor.drafts.course.levels = _.remove(editor.drafts.course.levels, function (n) {
+            return n.id != v.id
+        })
     }).catch((e) => {
         console.log(e)
     })

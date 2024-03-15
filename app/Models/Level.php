@@ -11,6 +11,7 @@ class Level extends Model
     use HasFactory;
 
     protected $fillable = ['title', 'benefits'];
+    protected $hidden = ['pivot'];
 
     public function benefits(): Attribute
     {

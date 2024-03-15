@@ -15,8 +15,8 @@ class Bulk_update implements ApiRouteInterface
     public function __construct(protected Request $req)
     {
         $this->req->validate([
-            "course_id"      => "required",
-            'section_levels' => 'array',
+            "course_id" => "required",
+            // 'level_ids' => 'array',
             // "updates"          => "array:id,,lessons",
             // "updates.*id"      => "required",
             // "updates.*lessons" => "array",
@@ -26,26 +26,32 @@ class Bulk_update implements ApiRouteInterface
     {
         try {
             DB::beginTransaction();
+            $data   = $this->req->all();
             $course = Auth::user()->courses()->firstWhere('id', $this->req->course_id) ?? throw new \Exception('course not found');
-            foreach ($this->req->updates as $v) {
-                $sectionData = collect($v)->except(['lessons', 'course_id', 'section_levels'])->toArray();
+            foreach ($data['updates'] as $key => $v) {
+                $v                     = collect($v)->map(fn($each) => $this->isJson($each));
+                $sectionData           = $v->except(['lessons', 'course_id', 'level_ids'])->toArray();
+                $data['updates'][$key] = $v->toArray();
+
                 if (isset($v['id'])) {
-                    $section = $course->sections()->where('sections.id', $v['id'])->first();
-                    if ($section) {
-                        $section->update($sectionData);
-                        if (isset($v['section_levels'])) {
-                            $section->levels()->syncWithPivotValues($v['section_levels'], ["tagged_type" => Section::class]);
-                        }
-                    }
+                    $section = $course->sections()->where('sections.id', $v['id'])->first() ?? throw new \Exception('invalid section passed');
+                    $section->update($sectionData);
                 } else {
                     $section = $course->sections()->create($sectionData);
-                    if (isset($v['section_levels'])) {
-                        $section->levels()->syncWithPivotValues($v['section_levels'], ["tagged_type" => Section::class]);
-                    }
+                }
+                $data['updates'][$key] = collect($data['updates'][$key])->merge($section);
+
+                if (isset($v['levels'])) {
+                    $section->levels()->syncWithPivotValues(collect($v['levels'])->map(fn($v) => $v->id)->toArray(), ["tagged_type" => Section::class]);
+                }
+                
+                if (isset($v['lessons'])) {
+                    // update lessons
+                    $data['updates'][$key]['lessons'] = $course->updateManyLessons($v['lessons'], $section->id);
                 }
             }
             DB::commit();
-            return response()->success($this->req->updates);
+            return response()->success($data);
         } catch (\Exception $e) {
             return response()->failed($e->getMessage());
         }

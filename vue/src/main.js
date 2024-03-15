@@ -1,10 +1,19 @@
 import './assets/main.css'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+
+// import Quill from 'quill';
+// import { ImageResize } from 'quill-image-resize-module';
+
+
+
+
+// Quill.register('modules/imageResize', ImageResize);
 
 import jquery from "jquery";
 import axios from 'axios'

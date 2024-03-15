@@ -37,14 +37,23 @@ trait FuncTrait
         Storage::disk('public')->delete($paths);
     }
 
-    public function saveResource($name, Model $model)
+    public function saveResource($name, Model $model, $resource = null)
     {
-        if (!$this->req->hasFile($name)) {
-            return false;
+        if (is_null($resource)) {
+            if (!$this->req->hasFile($name)) {
+                return false;
+            }
+            $object = $this->req->file($name);
+        } else {
+            if (is_uploaded_file($resource)) {
+                $object = $resource;
+            } else {
+                dd("Sd");
+            }
         }
-        $object = $this->req->file($name);
-        $file   = $this->uploadMediaFile($name, $object, "resource/" . $name);
-        $image  = $model->resources()->where('title', $name)->first();
+
+        $file  = $this->uploadMediaFile($name, $object, "resource/" . $name);
+        $image = $model->resources()->where('title', $name)->first();
         if ($image) {
             $image->alt  = $object->getClientOriginalName();
             $image->link = asset("storage$file");
@@ -58,6 +67,15 @@ trait FuncTrait
             ]);
         }
         return $file;
+    }
+
+    public function isJson($content)
+    {
+        if (!is_string($content)) {
+            return $content;
+        }
+        $json = @json_decode($content);
+        return json_last_error() == JSON_ERROR_NONE ? $json : $content;
     }
 
 }

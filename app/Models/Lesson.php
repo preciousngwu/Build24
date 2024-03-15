@@ -5,33 +5,45 @@ namespace App\Models;
 use App\Models\Level;
 use App\Models\Resource;
 use App\Models\Tagged_level;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\SimilarMutateTraits;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Lesson extends Model
 {
-    use HasFactory;
+    use HasFactory, SimilarMutateTraits;
 
-    protected $fillable = ["title", "summary", "type", "content"];
+    protected $fillable = ["section_id", "title", "summary", "type", "content", 'extras'];
+    protected $with     = ['levels'];
 
-    public function resource(): MorphOne
+    public function resources(): MorphMany
     {
-        return $this->morphOne(Resource::class, "resourceable");
+        return $this->morphMany(Resource::class, "resourceable");
     }
 
     public function content(): Attribute
     {
-        return Attribute::make(set: fn($v) => json_encode($v), get: fn($v) => json_decode($v));
+        return Attribute::make(set: fn($v) => json_encode($v), get: fn($v) => json_decode($v) ?? (object) []);
     }
 
-    /**
-     * Get all of the levels attached to lessons.
+        /**
+     * Get all of the tags for the post.
      */
-    public function levels(): BelongsToMany
+    public function levels(): MorphToMany
     {
-        return $this->belongsToMany(Level::class, "tagged_levels", 'tagged_id')->using(Tagged_level::class);
+        return $this->morphToMany(Level::class, 'tagged', 'tagged_levels');
     }
+
+
+    // /**
+    //  * Get all of the levels attached to lessons.‰
+    //  */
+    // public function levels(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Level::class, "tagged_levels", 'tagged_id')->where("tagged_type", Lesson::class)->using(Tagged_level::class);
+    // }
 }

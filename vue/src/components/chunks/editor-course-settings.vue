@@ -1,5 +1,5 @@
 <template>
-    <div v-if="editor.getTab('course-settings') == 'settings'" class="h-fit grid gap-3xl py-3xl lg:w-[727px]">
+    <div v-if="editor.getTab('course-settings') == 'settings'" class="h-fit grid gap-3xl p-3xl lg:w-[727px]">
         <div class="grid gap-sm pb-3xl">
             <h1 class="font-semibold">Basic settings</h1>
             <p class="text-content-tertiary">

@@ -2,3 +2,11 @@
 
 
 
+.ql-toolbar {
+    border-radius: 15px 15px 0px 0px;
+}
+
+.ql-container {
+    border-radius: 0px 0px 15px 15px;
+    min-height: 30em;
+}

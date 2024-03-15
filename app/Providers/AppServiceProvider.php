@@ -65,6 +65,5 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('without_spaces', function ($attr, $value) {
             return preg_match('/^\S*$/u', $value);
         });
-
     }
 }
